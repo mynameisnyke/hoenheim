@@ -42,7 +42,8 @@ const storage = new Storage();
 
 // Setup firestore here 
 const admin = require("firebase-admin");
-const serviceAccount = require("../keys/nykelab-ef89fec3339c.json");
+const serviceAccount = require("../keys/indekksu-firebase-key.json");
+
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -64,20 +65,20 @@ transcodeQueue.process(concurrency, async (job) => {
 
             console.log(`hello from ${os.hostname} starting a new webm transcode for ${job.data.fileNameClean}`, job.data, new Date())
 
-            let ogMetadata = await transcoder.probe(job.data.fileNameClean).catch(e => console.error(e))
+            const ogMetadata = await transcoder.probe(job.data.fileNameClean).catch(e => console.error(e))
 
-            let t1 = await transcoder.convertVideoWebm(job.data.fileNameClean, job.data.outputFormat)
+            const t1 = await transcoder.convertVideoWebm(job.data.fileNameClean, job.data.outputFormat)
 
-            // Upload hte file 
+            // Upload the file 
             storage.bucket(job.data.outputBucket).upload(t1.output, {
                 metadata: {
                     transcoder: hostname
                 }
             }).catch(e => { return e })
 
-            let t2 = await transcoder.convertVideoWebm720(job.data.fileNameClean, job.data.outputFormat)
+            const t2 = await transcoder.convertVideoWebm720(job.data.fileNameClean, job.data.outputFormat)
 
-             // Upload hte file 
+             // Upload the file 
              storage.bucket(job.data.outputBucket).upload(t2.output, {
                 metadata: {
                     transcoder: hostname
@@ -85,7 +86,7 @@ transcodeQueue.process(concurrency, async (job) => {
             }).catch(e => { return e })
 
 
-            let t3 = await transcoder.convertVideoWebm720(job.data.fileNameClean, job.data.outputFormat)
+            const t3 = await transcoder.convertVideoWebm720(job.data.fileNameClean, job.data.outputFormat)
 
              // Upload hte file 
              storage.bucket(job.data.outputBucket).upload(t3.output, {
@@ -102,36 +103,36 @@ transcodeQueue.process(concurrency, async (job) => {
                 t2: t2,
                 t3: t3
             }).catch(e => console.error(e))
-
-            
-
+            break;
         case 'mp4':
 
             console.log(`hello from ${os.hostname} starting a new mp4 transcode for ${job.data.fileNameClean}`, new Date())
-            let ogMetadata = await transcoder.probe(job.data.fileNameClean).catch(e => console.error(e))
-            let t1 = await transcoder.convertVideoH264(job.data.fileNameClean, job.data.outputFormat, ogMetadata).catch(e => console.error(e))
+
+            const mp4ogMetadata = await transcoder.probe(job.data.fileNameClean).catch(e => console.error(e))
+
+            let mp4t1 = await transcoder.convertVideoH264(job.data.fileNameClean, job.data.outputFormat, mp4ogMetadata).catch(e => console.error(e))
 
 
             // Upload t1 
-            storage.bucket(job.data.outputBucket).upload(t1.output, {
+            storage.bucket(job.data.outputBucket).upload(mp4t1.output, {
                 metadata: {
                     transcoder: hostname,
-                    metadata: ogMetadata
+                    metadata: mp4ogMetadata
                 }
             }).then(uploadResults => {
                 console.log(`${job.data.fileNameClean} t1 uploaded and transcode finshed`)
                 collectionRef.doc(job.data.fileNameClean)
-                    .set({ 'sourcejob': data, outputURI: `https://storage.cloud.google.com/${job.data.outputBucket}/${t1.output}`, inputURI: `https://storage.cloud.google.com/nrh-videos/${fileNameClean}`, filename: fileNameClean })
+                    .set({ 'sourcejob': data, outputURI: `https://storage.cloud.google.com/${job.data.outputBucket}/${mp4t1.output}`, inputURI: `https://storage.cloud.google.com/nrh-videos/${fileNameClean}`, filename: fileNameClean })
                     .catch(e => console.error(e))
             }).catch(e => { return e })
 
-            let t2 = await transcoder.convertVideoH264720(job.data.fileNameClean, job.data.outputFormat, ogMetadata).catch(e => console.error(e))
+            let mp4t2 = await transcoder.convertVideoH264720(job.data.fileNameClean, job.data.outputFormat, mp4ogMetadata).catch(e => console.error(e))
 
             // Upload t2 
-            await storage.bucket(job.data.outputBucket).upload(t2.output, {
+            await storage.bucket(job.data.outputBucket).upload(mp4t2.output, {
                 metadata: {
                     transcoder: hostname,
-                    metadata: ogMetadata
+                    metadata: mp4ogMetadata
                 }
             }).catch(e => { return e })
 
@@ -140,8 +141,8 @@ transcodeQueue.process(concurrency, async (job) => {
             await collectionRef.doc().set({
                 filename: job.data.fileNameClean,
                 output: job.data.outputFormat,
-                t1: t1,
-                t2: t2,
+                t1: mp4t1,
+                t2: mp4t2,
             }).catch(e => console.error(e))
             break
         default:

@@ -256,7 +256,7 @@ const convertVideoWebm720 = (file, format) => {
                             hSize: readableBytes(metadata.format.size),
                             rawSize: metadata.format.size
                         }
-                        resolve({ inputMetadata, outputMetadata, timeSpent, output: `${fileName}x720p.${format}` })
+                        resolve({ inputMetadata, outputMetadata, timeSpent, output: `${fileName}-720p.${format}` })
                     })
 
                 }).on('error', function (err, stdout, stderr) {
@@ -442,13 +442,13 @@ const convertVideoH264720 = (file, format, metadata) => {
                         hSize: readableBytes(metadata.format.size),
                         rawSize: metadata.format.size
                     }
-                    resolve({ inputMetadata, outputMetadata, timeSpent, output: `${fileName}x720p.${format}` })
+                    resolve({ inputMetadata, outputMetadata, timeSpent, output: `${fileName}-720p.${format}` })
                 })
 
             }).on('error', function (err, stdout, stderr) {
                 console.log('Cannot process video on second pass: ' + err.message, fileName);
                 reject(err)
-            }).output(`${fileName}x720p.${format}`).run();
+            }).output(`${fileName}-720p.${format}`).run();
 
         }).on('error', function (err, stdout, stderr) {
             console.log('Cannot process video on first pass: ' + err.message, fileName);

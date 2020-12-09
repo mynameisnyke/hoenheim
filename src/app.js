@@ -1,4 +1,4 @@
-const { transcodeQueue } = require('./jobQueue.js')
+const { transcodeQueue } = require('./queue.js')
 const os = require('os')
 
 
@@ -23,7 +23,7 @@ async function fetchFiles(bucketName) {
 // Uncomment to run 
 
 
-fetchFiles('nl-video-welcome-full')
+fetchFiles('nl-testing')
     .catch(e => console.error(e))
     .then(async (res) => {
 
@@ -49,7 +49,7 @@ fetchFiles('nl-video-welcome-full')
                 let job = transcodeQueue.createJob({
                     fileNameClean,
                     outputFormat: 'mp4',
-                    outputBucket: `${res.bucketName}-proxies`
+                    outputBucket: `${res.bucketName}`
                 })
                 job
                     .setId(file.name)
